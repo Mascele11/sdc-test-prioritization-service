@@ -28,7 +28,7 @@ import requests
 BASE_URL = "http://localhost:8000"
 DEFAULT_DATA_FILE = "sdc-test-data.json"
 TESTS_PER_SUITE = 10
-STRATEGIES = ["longest-first", "total-distance-first", "euclidean-outlier-first", "mahalanobis-outlier-first", "less-safe-first"]
+STRATEGIES = ["longest-first", "euclidean-outlier-first", "mahalanobis-outlier-first", "less-safe-first"]
 
 # =============================================================================
 #   Logger
