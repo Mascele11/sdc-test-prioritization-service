@@ -1,0 +1,18 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+logging:
+  log_level: "INFO"
+  file_log_level: "DEBUG"
+  file_log_dir: "logs"
+  file_log_max_files: 5
+  file_log_file_size_mb: 10
+
+mongodb:
+  database: "sdc_testing"
+  collection_test_cases: "test_cases"
+
+postgresql:
+  pool_min_size: 2
+  pool_max_size: 10

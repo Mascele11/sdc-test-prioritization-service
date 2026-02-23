@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # MongoDB – stores full test case documents with road points
+  # ---------------------------------------------------------------------------
+  mongodb:
+    image: mongo:7
+    container_name: sdc-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL – stores test suites and evaluation history
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: sdc-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB:       sdc_testing
+      POSTGRES_USER:     sdc_user
+      POSTGRES_PASSWORD: sdc_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdc_user -d sdc_testing"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # Prioritizer – the FastAPI REST service for SDC Prioritization
+  # ---------------------------------------------------------------------------
+  prioritizer:
+    build: .
+    container_name: sdc-prioritizer
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
+  postgres_data:
