@@ -4,7 +4,7 @@ This repository implements a REST API for uploading, prioritizing, and evaluatin
 
 ## Service Architecture
 
-The SCD Test Prioritization Service follows a **layered architecture** with strict separation of concerns, as depicted below:
+The SCD Test Prioritization Service follows a **layered architecture** as depicted below:
 
 ```
 ┌───────────────────────────────────────────────────────┐
@@ -38,7 +38,7 @@ The SCD Test Prioritization Service follows a **layered architecture** with stri
 - **Stateless prioritization** — the `GET /prioritization` endpoint computes ordering on the fly without storing results, keeping the system stateless where possible.
 - **Budget mode as optional field** — evaluation supports both base and budget modes via a single endpoint with an optional `budget` parameter. No separate endpoints, no architectural changes.
 - **Routers** - the two routers handled different data and have been separated for REST best practices.
-- 
+
 ## REST API Endpoints
 
 | Method | Path | Description | Status |
