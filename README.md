@@ -1,6 +1,6 @@
 # SDC Test Prioritization Service
 
-This repository implements a REST API for uploading, prioritizing, and evaluating Self-Driving Car (SDC) simulation test suites. The service aims provide to users a seamless integration of their prioritization strategies, by adding them into inner layer (strategies.py). It has been followed the Open/Close methodology to be compliant for future gRPC integration. It has been inspired by the [SDC Testing Competition 2026 – Test Prioritization Track](https://github.com/christianbirchler-org/sdc-testing-competition).
+This repository implements a REST API for uploading, prioritizing, and evaluating Self-Driving Car (SDC) simulation test suites. The service aims to provide to users a seamless integration of their prioritization strategies, by adding them into inner layer (strategies.py). It has been followed the Open/Close methodology to be compliant for future gRPC integration. It has been inspired by the [SDC Testing Competition 2026 – Test Prioritization Track](https://github.com/christianbirchler-org/sdc-testing-competition).
 
 ## Service Architecture
 
