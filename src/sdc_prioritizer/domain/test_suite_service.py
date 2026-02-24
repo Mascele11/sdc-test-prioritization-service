@@ -96,11 +96,23 @@ class TestSuiteService:
 
     # -------------------------------------------------------------------------
     def prioritize_test_suite(self, suite_id: str, strategy_name: str) -> PrioritizeResponse:
-        """Apply a prioritization strategy to an existing test suite.
+        """
+        Prioritizes a test suite by applying a specified prioritization strategy.
 
-        Fetches raw road points from MongoDB so that each strategy
-        can compute its own metrics — keeping strategies self-contained
-        and respecting the Open/Closed Principle.
+        This method ensures that the test suite exists, determines the correct strategy
+        to apply, fetches the necessary test cases from the database, performs the prioritization,
+        and returns an ordered list of test case IDs.
+
+        Args:
+            suite_id (str): Identifier of the test suite to prioritize.
+            strategy_name (str): Name of the prioritization strategy to apply.
+
+        Returns:
+            PrioritizeResponse: Response containing the prioritized test suite details.
+
+        Raises:
+            TestSuiteNotFoundError: If the specified test suite does not exist in the system.
+            StrategyNotFoundError: If the specified prioritization strategy is not available.
         """
         suite_id = suite_id
         strategy_name = strategy_name
@@ -136,11 +148,24 @@ class TestSuiteService:
 
     # -------------------------------------------------------------------------
     def evaluate_test_suite(self, request: EvaluateRequest) -> EvaluateResponse:
-        """Apply a prioritization strategy to an existing test suite.
+        """
+        Evaluates a test suite using a specified prioritization strategy and computes
+        metrics such as failure counts, execution costs, and APFD score. It
+        also saves the evaluation report to PostgreSQL for future persistance.
 
-        Fetches raw road points from MongoDB so that each strategy
-        can compute its own metrics — keeping strategies self-contained
-        and respecting the Open/Closed Principle.
+        Args:
+            request (EvaluateRequest): A request object containing the test suite ID,
+                the prioritization strategy to apply, and other optional parameters
+                like budget for execution.
+
+        Returns:
+            EvaluateResponse: An object containing the results of the evaluation,
+                including evaluation ID, test suite ID, selected strategy, number of
+                failures detected, execution cost, and APFD score.
+
+        Raises:
+            TestSuiteNotFoundError: If the specified test suite does not exist in the
+                PostgreSQL database.
         """
         suite_id = request.testSuiteId
         strategy_name = request.strategy
@@ -149,7 +174,7 @@ class TestSuiteService:
             "Evaluating suite '%s' with strategy '%s'.", suite_id, strategy_name,
         )
 
-        start_time = time.time() # Measure execution time
+        start_time = time.time() # Measures execution time
 
         # 1. Guard: check suite exists
         if not self._postgres.suite_exists(suite_id):

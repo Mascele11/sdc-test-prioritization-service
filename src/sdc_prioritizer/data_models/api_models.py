@@ -197,7 +197,8 @@ class EvaluateRequest(BaseModel):
 
     Supports two evaluation modes:
     - Base mode:   omit budget — all tests execute fully (unless OOB).
-    - Budget mode: provide budget — execution stops when budget is exhausted.
+    - Budget mode: provide budget — execution stops when budget is exhausted
+        by the number of road points executed (requested by assignment).
     """
 
     testSuiteId: str = Field(

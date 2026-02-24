@@ -3,17 +3,18 @@
 Implements the **Strategy Pattern** so that new prioritization algorithms
 can be added without modifying existing code (Open/Closed Principle).
 
-Adding a new strategy:
-    1. Create a class that inherits from ``PrioritizationStrategy``.
+How to add a new strategy:
+    1. Create a class that inherits base class from ``PrioritizationStrategy``.
     2. Implement the ``prioritize`` method.
-    3. Register it in ``STRATEGY_REGISTRY`` with a kebab-case key.
+    3. Register it in ``STRATEGY_REGISTRY`` with a kebab-case key (e.g.
+        ``"my-strategy"``).
 
 Architecture note:
-    Strategies operate on ``TestCaseMetrics`` – a lightweight, transport-
-    agnostic domain object.  This keeps the strategy logic decoupled from
-    both the REST layer (Pydantic models) and the gRPC layer (Protobuf),
-    allowing the same strategies to be reused if the service is later
-    integrated with the competition's gRPC evaluator.
+    Strategies operate on ``TestCaseData`` – a lightweight, transport-
+    agnostic domain object (i.e., road points).  This keeps the strategy logic
+    decoupled from both the REST layer (Pydantic models) and the gRPC
+    layer (Protobuf), allowing the same strategies to be reused if the service
+    is later integrated with the competition's gRPC evaluator.
 """
 
 import logging
@@ -35,10 +36,11 @@ logger = logging.getLogger(Path(__file__).stem)
 # =============================================================================
 @dataclass(frozen=True)
 class TestCaseData:
-    """Transport-agnostic domain object carrying raw road points for feature
-    implementation with gRPC.
+    """
+    Transport-agnostic domain object carrying raw road points for possible
+    future implementation with gRPC transport layer..
 
-    Strategies receive full road data and compute  metrics they need internally.
+    Strategies receive full road data and compute metrics they need internally.
     This keeps strategies self-contained and allows new ones to be added
     without modifying persistence or upload logic to meet Open/Closed
     Principle.
@@ -207,7 +209,8 @@ def extract_features(tc: TestCaseData, divide_pi: int = 18) -> List[float]:
 #   Strategy Base Class – Abstract Base Class for validation
 # =============================================================================
 class PrioritizationStrategy(ABC):
-    """Interface that every prioritization strategy must implement."""
+    """Base class for prioritization strategies. We ask for users that want
+    to add new prioritization strategies to inherit abstract method."""
 
     @abstractmethod
     def prioritize(self, test_cases: List[TestCaseData]) -> List[str]:
@@ -231,7 +234,7 @@ class OutlierSortStrategy(PrioritizationStrategy):
         - euclidean:    z-score normalize, then Euclidean from origin
         - mahalanobis:  accounts for feature correlations via inverse covariance
 
-    Tests with unusual road geometry (sharp turns, abnormal distances)
+    Intuition: tests with unusual road geometry (sharp turns, abnormal distances)
     score higher and are prioritized first — targeting likely failures.
     """
 
@@ -265,7 +268,8 @@ class OutlierSortStrategy(PrioritizationStrategy):
 
 
 class LessSafeStrategy(PrioritizationStrategy):
-    """Sort tests by safety sum value.
+    """Sort tests by safety sum value, the intuition is that tests with less
+    area between road and simplified polyline are more likely to fail.
 
     """
     def prioritize(self, test_cases: List[TestCaseData]) -> List[str]:

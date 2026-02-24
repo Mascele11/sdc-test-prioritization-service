@@ -40,17 +40,18 @@ class PostgresTestSuiteRepository:
 
     # -------------------------------------------------------------------------
     def insert_suite(self, suite_id: str, test_count: int) -> datetime:
-        """Insert suite metadata.
+        """
+        Inserts a test suite record into the PostgreSQL database.
 
         Args:
-            suite_id: The suite identifier.
-            test_count: Number of test cases in the suite.
+            suite_id: Unique identifier of the test suite.
+            test_count: Number of tests contained in the test suite.
 
         Returns:
-            The UTC timestamp recorded for the suite row.
+            datetime: The UTC timestamp representing when the suite was created and persisted.
 
         Raises:
-            PersistenceError: On unexpected database failure.
+            PersistenceError: If attempting to persist data in PostgreSQL fails due to any exception.
         """
         now = datetime.now(tz=timezone.utc)
 
@@ -86,13 +87,28 @@ class PostgresTestSuiteRepository:
             score: float,
             duration_ms: int,
     ) -> int:
-        """Persist an evaluation report.
+        """
+        Persist an evaluation record in the evaluation history database table and returns
+        the generated evaluation ID.
+
+        This function inserts a new row into the `evaluation_history` table with the
+        provided evaluation details.
+
+        Args:
+            suite_id (str): Suite identifier associated with the evaluation.
+            strategy (str): Strategy used during the evaluation.
+            test_count (int): Total number of tests executed during the evaluation.
+            failures_detected (int): Number of test failures detected during the evaluation.
+            execution_cost (int): Cost associated with executing the evaluation.
+            score (float): Computed score for the evaluation.
+            duration_ms (int): Time taken for the evaluation in milliseconds.
 
         Returns:
-            The generated evaluation_id.
+            int: The identifier of the newly created evaluation record.
 
         Raises:
-            PersistenceError: On unexpected database failure.
+            PersistenceError: If an error occurs while storing the evaluation in the
+            database.
         """
         try:
             with self._pool.connection() as conn:

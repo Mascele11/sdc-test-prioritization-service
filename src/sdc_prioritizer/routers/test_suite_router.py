@@ -128,7 +128,24 @@ async def prioritize_test_suite(
     strategy: str = Query(min_length=1, description="Prioritization strategy name."),
     service: TestSuiteService = Depends(get_test_suite_service),
 ) -> JSONResponse:
-    """Prioritize test suite endpoint handler."""
+    """
+    Prioritize a test suite using the specified strategy.
+
+
+    Args:
+        testSuiteId (str): Suite ID in the format 'suite_XX'. Must match the specified pattern.
+        strategy (str): The name of the prioritization strategy. Must have a minimum length of 1.
+        service (TestSuiteService): Dependency-injected service used to process the test suite.
+
+    Returns:
+        JSONResponse: Contains the response with an ordered list of test IDs or an error message.
+
+    Raises:
+        TestSuiteNotFoundError: If the specified test suite does not exist.
+        StrategyNotFoundError: If the requested prioritization strategy is not found.
+        PersistenceError: If there is a failure related to persistence.
+        Exception: If any unexpected error occurs during execution.
+    """
     logger.debug(
         "GET /v1/test-suite/prioritization – suiteId='%s', strategy='%s'",
         testSuiteId, strategy,
@@ -177,8 +194,8 @@ async def prioritize_test_suite(
     "/evaluation",
     summary="Evaluate a test suite.",
     description=(
-        "Prioritizes test cases using the given strategy, then simulates "
-        "execution with a deterministic mock failure function. "
+        "Prioritizes test cases using the given strategy, simulates"
+        "with a deterministic mock failure function and budget mode. "
         "Computes APFD score and stores the evaluation report. "
         f"Available strategies: {', '.join(available_strategies())}."
     ),
@@ -195,7 +212,29 @@ async def evaluate_test_suite(
     body: EvaluateRequest,
     service: TestSuiteService = Depends(get_test_suite_service),
 ) -> JSONResponse:
-    """Evaluate test suite endpoint handler."""
+    """
+    Evaluates a test suite by prioritizing test cases using a specified strategy
+    and evaluation mode (budget and no budget).
+
+    Args:
+        body (EvaluateRequest): The request body containing the test suite ID,
+            the prioritization strategy and the evaluation mode.
+        service (TestSuiteService): A dependency-injected service responsible for
+            managing and evaluating test suites.
+
+    Returns:
+        JSONResponse: The HTTP response indicating the evaluation outcome or
+        describing the encountered error.
+
+    Raises:
+        TestSuiteNotFoundError: Raised if the test suite with the given ID is
+            not found.
+        StrategyNotFoundError: Raised if the provided strategy is unrecognized.
+        PersistenceError: Raised if there is an error during the persistence
+            operation.
+        Exception: Catches and logs unexpected errors, returning an internal
+            server error response.
+    """
     logger.debug(
         "POST /v1/test-suite/evaluation – suiteId='%s', strategy='%s'",
         body.testSuiteId, body.strategy,

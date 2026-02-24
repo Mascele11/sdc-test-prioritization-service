@@ -1,8 +1,9 @@
-"""Evaluation logic for simulated test execution.
+"""
+Evaluation logic for simulated test execution.
 
 Contains the mock failure function and metric computations.
-Decoupled from strategies and transport — in the competition,
-the evaluator handles this externally via gRPC.
+Decoupled from strategies and transport. Designed to
+be compliant with the competition gRPC evaluator.
 """
 
 import math
@@ -23,13 +24,22 @@ logger = logging.getLogger(Path(__file__).stem)
 # =============================================================================
 def mock_has_failed(tc: TestCaseData, max_points: int | None = None) -> (bool, int):
     """
-    Deterministic mock failure based on max angle change.
-    A test is stopped when the test fails, return condition satisfied.
-    A test fails if the maximum angle change between consecutive
-    road segments exceeds max angle — simulating OOB on sharp turns.
-    max_angle custom value defined to have a baseline of failure on competition
-    test dataset:
-         max angles range from 1.36° to 6.66° @ sdc-test-data.json
+    Determines if a test case has failed based on the angular displacement between consecutive road points.
+
+    This function evaluates a series of road points in a test case to check for excessive angular deviations
+    that may indicate a failure. The analysis stops as soon as a failure is detected or when the evaluation
+    reaches the predefined maximum point limit (as requested by assignment).
+
+    Args:
+        tc (TestCaseData): A test case containing a list of road points to analyze. Each point is represented
+            as a tuple containing x and y coordinates (e.g., (x, y)).
+        max_points (int | None, optional): The maximum number of points to evaluate. If None, all points in
+            the test case are analyzed. Defaults to None.
+
+    Returns:
+        tuple[bool, int]: A tuple where the first element indicates whether a failure was detected (True if
+        failure occurred, False otherwise) and the second element contains the number of points evaluated
+        before the function returned.
     """
     if len(tc.road_points) < 3:
         # Assumption: at least 3 points per test are evaluated to perform mock
@@ -74,17 +84,30 @@ def mock_has_failed(tc: TestCaseData, max_points: int | None = None) -> (bool, i
 
 
 # =============================================================================
-#   APFD Metric
+#   APFD Metric - Metric for evaluating Prioritizers
 # =============================================================================
 def compute_apfd(
     ordered_ids: List[str],
     failure_map: Dict[str, bool],
 ) -> float:
     """
+    Computes the Average Percentage of Faults Detected (APFD) for an ordered list of test
+    cases and a failure mapping.
+
     APFD definition retrieved in paper (ref: https://doi.org/10.48550/arXiv.2504.10313)
         APFD = 1 - (sum of fault positions) / (n * m) + 1 / (2n)
 
-    Score has to be maximized: earlier scores have fewer ration values.
+    The score has to be maximized (earlier scores have fewer ration values).
+
+    Args:
+        ordered_ids (List[str]): A list of test case identifiers in the order of execution.
+        failure_map (Dict[str, bool]): A dictionary mapping each test case identifier to
+            a boolean value indicating if the test case detects a fault (True for fault-detecting,
+            False otherwise).
+
+    Returns:
+        float: The computed APFD value. It ranges from 0 to 1, where higher values indicate
+            better fault detection performance.
     """
     n = len(ordered_ids)
     fault_positions = []

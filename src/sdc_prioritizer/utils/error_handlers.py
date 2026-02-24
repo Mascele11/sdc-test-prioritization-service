@@ -21,7 +21,18 @@ logger = logging.getLogger(Path(__file__).stem)
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
-    """422 error handler for input validation errors."""
+    """
+    Handles validation exceptions raised when request validation fails.
+
+    Args:
+        request (Request): The HTTP request object that triggered the validation error.
+        exc (RequestValidationError): The exception object containing details of
+            validation failures.
+
+    Returns:
+        JSONResponse: A JSON response object with HTTP status code 422, containing
+            a message and detailed error information.
+    """
     errors = []
     for error in exc.errors():
         field = " → ".join(str(loc) for loc in error["loc"])

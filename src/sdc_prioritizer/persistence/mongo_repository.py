@@ -55,16 +55,26 @@ class MongoTestCaseRepository:
 
     # -------------------------------------------------------------------------
     def get_test_cases_for_suite(self, suite_id: str) -> List[TestCaseData]:
-        """Fetch all test cases with road points for a given suite -> endpoint 2.
+        """
+        Fetches test cases associated with a specific suite from the database.
+
+        This method retrieves test case documents from the MongoDB collection based
+        on the provided suite ID. It processes the documents to extract relevant
+        data and constructs a list of `TestCaseData` objects, each of which
+        contains the test ID and sorted road points for the test case.
 
         Args:
-            suite_id: The suite to look up.
+            suite_id (str): The unique identifier of the test suite for which
+            test cases are to be retrieved.
 
         Returns:
-            List of TestCaseData domain objects with raw road points.
+            List[TestCaseData]: A list of `TestCaseData` objects containing test
+            case details, including test ID and road points sorted by sequence
+            number.
 
         Raises:
-            PersistenceError: On unexpected database failure.
+            PersistenceError: Raised when there is an issue fetching test cases
+            from the database.
         """
 
         try:
@@ -89,15 +99,21 @@ class MongoTestCaseRepository:
 
     # -------------------------------------------------------------------------
     def insert_test_cases(self, suite_id: str, test_cases: List[TestCase]) -> None:
-        """Bulk-insert test case documents for a given suite.
+        """
+        Inserts a batch of test cases into the database for a specified test suite.
+
+        Before inserting the test cases, the method ensures that the specified test
+        suite does not already exist. Each test case is processed to extract relevant
+        data, including road points and creation timestamp.
 
         Args:
-            suite_id: The parent suite identifier.
-            test_cases: Validated test case objects.
+            suite_id: The unique identifier for the test suite.
+            test_cases: A list of TestCase objects to be inserted into the database.
 
         Raises:
-            TestSuiteAlreadyExistsError: If any document for this suite already exists.
-            PersistenceError: On unexpected database failure.
+            TestSuiteAlreadyExistsError: If a test suite with the given suite_id
+                has already been uploaded or contains test cases that already exist.
+            PersistenceError: If there is an issue persisting test cases to the database.
         """
         if self.suite_exists(suite_id):
             raise TestSuiteAlreadyExistsError(
